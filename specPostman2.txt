@@ -1,0 +1,52 @@
+SPECIFIKACE CVICENI: NACITANI PROMENNYCH A TEST JMENA V POSTMANU
+
+Cil
+V Postmanu vytvorit GET pozadavek, nacist z JSON odpovedi promenne email,
+first_name a last_name a automaticky overit, ze first_name je Mirka.
+
+Testovana URL
+https://postman-echo.com/get?email=mirka.novakova%40example.com&first_name=Mirka&last_name=Novakova
+
+Postman Echo vraci query parametry v objektu args JSON odpovedi. URL je
+verejna a pro tento priklad nevyzaduje autentizaci.
+
+Postup v Postmanu
+
+1. Vytvorte novy HTTP request.
+2. Nastavte metodu GET a vlozte uvedenou URL.
+3. Otevrete Scripts, cast Post-response, a vlozte nasledujici skript:
+
+   const body = pm.response.json();
+
+   pm.variables.set("email", body.args.email);
+   pm.variables.set("first_name", body.args.first_name);
+   pm.variables.set("last_name", body.args.last_name);
+
+   pm.test("Odpoved ma stav 200", function () {
+	   pm.response.to.have.status(200);
+   });
+
+   pm.test("Promenne byly nacteny z odpovedi", function () {
+	   pm.expect(pm.variables.get("email")).to.eql("mirka.novakova@example.com");
+	   pm.expect(pm.variables.get("first_name")).to.eql("Mirka");
+	   pm.expect(pm.variables.get("last_name")).to.eql("Novakova");
+   });
+
+   pm.test("first_name je Mirka", function () {
+	   pm.expect(pm.variables.get("first_name")).to.eql("Mirka");
+   });
+
+4. Kliknete na Send a zkontrolujte, ze odpoved obsahuje objekt args se
+   vsemi tremi hodnotami a ze v zalozce Test Results projdou vsechny
+   3 testy.
+
+Ocekavany vysledek
+- HTTP status: 200.
+- email: mirka.novakova@example.com.
+- first_name: Mirka.
+- last_name: Novakova.
+- Test „first_name je Mirka“ projde.
+
+Kriterium splneni
+Pozadavek vrati uspesnou JSON odpoved, skript z ni nastavi promenne
+email, first_name a last_name a automaticky potvrdi, ze first_name je Mirka.
