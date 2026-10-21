@@ -1,0 +1,73 @@
+SPECIFIKACE CVICENI: POSTMAN A TESTOVANI API Z PRIKAZOVE RADKY
+
+Cil
+V Postmanu vytvorit GET pozadavek na verejne testovaci API, overit jeho
+odpoved automatickymi testy a spustit stejny test z prikazove radky.
+
+Testovana URL
+https://postman-echo.com/get?foo1=bar1&foo2=bar2
+
+Postman Echo je sluzba urcena k testovani HTTP pozadavku. Vraci informace
+o prijatem pozadavku; v tomto prikladu lze v odpovedi overit query parametry.
+Pozadavek nevyzaduje prihlaseni ani API klic.
+
+1. Vytvoreni pozadavku v Postmanu
+
+1. Vytvorte kolekci s nazvem „Postman Echo - cviceni“.
+2. Do kolekce pridejte pozadavek s nazvem „GET - kontrola query parametru“.
+3. Nastavte metodu GET a zadejte URL:
+   https://postman-echo.com/get?foo1=bar1&foo2=bar2
+4. Otevrete zalozku Scripts, cast Post-response, a vlozte testy:
+
+   pm.test("HTTP status je 200", function () {
+	   pm.response.to.have.status(200);
+   });
+
+   pm.test("Odpoved je JSON", function () {
+	   pm.response.to.be.json;
+   });
+
+   pm.test("Query parametr foo1 ma hodnotu bar1", function () {
+	   const body = pm.response.json();
+	   pm.expect(body.args.foo1).to.eql("bar1");
+   });
+
+   pm.test("Query parametr foo2 ma hodnotu bar2", function () {
+	   const body = pm.response.json();
+	   pm.expect(body.args.foo2).to.eql("bar2");
+   });
+
+5. Pozadavek ulozte a kliknete na Send. Ocekavany vysledek je HTTP 200,
+   JSON odpoved a 4 uspesne testy. V tele odpovedi maji byt parametry
+   args.foo1 = "bar1" a args.foo2 = "bar2".
+
+2. Export kolekce
+
+Pro spusteni z prikazove radky ulozte kolekci do souboru ve formatu
+Collection v2.1 a pojmenujte jej PostmanEcho.collection.json.
+V Postmanu otevorte menu kolekce, zvolte Export a vyberte format v2.1.
+Soubor ulozte do aktualniho pracovniho adresare terminalu.
+
+3. Spusteni testu z prikazove radky
+
+Je potreba mit nainstalovany Node.js. V adresari, ve kterem je ulozena
+exportovana kolekce, spustete:
+
+   npx --yes newman run ./PostmanEcho.collection.json
+
+Newman vykona HTTP pozadavek a testy ulozene v kolekci. Vystup ma ukazat
+4 passed a 0 failed. Pri uspesnem behu prikaz skonci navratovym kodem 0;
+pri chybe testu nebo pozadavku skonci nenulovym kodem. To umoznuje pouzit
+prikaz i v automatizaci nebo CI.
+
+Volitelna kontrola samotne URL bez Postmanu:
+
+   curl "https://postman-echo.com/get?foo1=bar1&foo2=bar2"
+
+Tato kontrola pouze vypise odpoved API; automaticke testy provadi az Newman.
+
+Kriterium splneni
+- Pozadavek GET vraci HTTP 200.
+- Odpoved lze nacist jako JSON.
+- V odpovedi jsou oba ocekavane query parametry.
+- Newman spusti kolekci a vsechny 4 testy projdou.
